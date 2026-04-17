@@ -21,7 +21,7 @@
         };
       }).config.build.wrapper;
   in {
-    devShells = eachSystem (pkgs: {default = pkgs.mkShell {packages = [(formatter pkgs)];};});
+    devShells = eachSystem (pkgs: {default = pkgs.mkShell {packages = [pkgs.verible (formatter pkgs)];};});
     formatter = eachSystem formatter;
   };
 }
