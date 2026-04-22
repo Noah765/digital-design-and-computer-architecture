@@ -1,0 +1,47 @@
+module BadALU (
+  input [3:0] alu_op,
+  input [31:0] a,
+  input [31:0] b,
+  output [31:0] result,
+  output zero
+);
+  reg [31:0] slt;
+  reg [31:0] logicsel;
+
+  reg [31:0] alu_val;  // we need to declare this reg
+  reg [31:0] diff;
+  wire ss0;
+  wire ss1;
+  wire ss2;
+  wire ss3;
+
+  assign {ss3, ss2, ss1, ss0} = alu_op;  // make assigns
+
+  // define the logicfunction
+  always @(*) begin
+    if (ss1 == 0)
+      if (ss0 == 0) logicsel = a & b;
+      else logicsel = a | b;
+    else if (ss0 == 1) logicsel = ~(a | b);
+    else logicsel = a ^ b;
+  end
+
+  always @(alu_op, a, b)
+    if (alu_op == 4'b1010) begin
+      diff = a - b;  // calculate the difference
+      slt  = 0;  // default value
+      if (diff[31] == 1) slt = 1;  // if MSB is 1 slt is 1
+    end
+
+  always @(*) begin
+    case (alu_op)
+      4'b0000: alu_val = a + b;
+      4'b0010: alu_val = a - b;
+      4'b1010: alu_val = slt;
+      default: alu_val = logicsel;
+    endcase
+  end
+
+  assign result = alu_val;
+  assign zero   = (alu_val == 32'b0) ? 1 : 0;
+endmodule
